@@ -1,0 +1,39 @@
+services:
+  app:
+    image: analytics-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # environment:
+    #   - PORT=8000
+    #   - DATABASE_URL=postgresql+psycopg://time-user:time-pw@db_service:5432/timescaledb
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./src:/code:rw
+    develop:
+      watch:
+        - action: rebuild
+          path: Dockerfile
+        - action: rebuild
+          path: requirements.txt
+        - action: rebuild
+          path: compose.yaml
+  db_service:
+    image: timescale/timescaledb:latest-pg17
+    environment:
+      - POSTGRES_USER=pratik
+      - POSTGRES_PASSWORD=pratik
+      - POSTGRES_DB=timescaledb
+    ports:
+      - "5432:5432"
+    # expose:
+    #   - 5432
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+
+volumes:
+  timescaledb_data:
